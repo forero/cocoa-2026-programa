@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCOA 2026 · Programa completo</title>
+<style>
+  :root{
+    --paper:#faf7f0;
+    --paper-line:#ded7c4;
+    --ink:#1c2a36;
+    --ink-soft:#57636d;
+    --navy:#0b2e59;
+    --navy-soft:#3a5678;
+    --brick:#a3321c;
+    --brick-soft:#c9603f;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:32px 18px 80px;}
+
+  header{ text-align:center; margin-bottom:22px; }
+  .kicker{ font-size:13px; color:var(--ink-soft); margin:0 0 6px; }
+  h1{
+    font-family:Iowan Old Style, Palatino Linotype, Georgia, "Times New Roman", serif;
+    font-weight:600;
+    font-size:clamp(28px,5vw,40px);
+    margin:0 0 4px;
+    color:var(--navy);
+  }
+  .subline{ color:var(--ink-soft); font-size:14.5px; margin:0; }
+
+  .rule{
+    height:1px;
+    background:linear-gradient(to right, transparent, var(--paper-line) 15%, var(--paper-line) 85%, transparent);
+    margin:20px 0;
+  }
+
+  /* Day tabs */
+  .days{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .day-btn{
+    border:1px solid var(--paper-line);
+    background:var(--card);
+    color:var(--ink-soft);
+    font-size:13px;
+    font-weight:600;
+    padding:9px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:all .15s ease;
+    text-align:left;
+    line-height:1.3;
+  }
+  .day-btn .d-name{ display:block; color:var(--navy); font-size:13.5px; }
+  .day-btn .d-venue{ display:block; font-weight:400; font-size:11px; color:var(--ink-soft); }
+  .day-btn.active{ background:var(--navy); border-color:var(--navy); }
+  .day-btn.active .d-name, .day-btn.active .d-venue{ color:#fff; }
+
+  /* General day info */
+  .general{
+    margin-bottom:22px;
+  }
+  .general-title{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--brick);
+    letter-spacing:.02em;
+    margin:0 0 8px 2px;
+  }
+  .general-list{ display:flex; flex-direction:column; gap:6px; }
+  .g-item{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    font-size:13px;
+    padding:5px 2px;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .g-item .g-time{ flex:0 0 96px; font-weight:600; color:var(--navy-soft); }
+  .g-item .g-text{ color:var(--ink); }
+  .g-item .g-text b{ font-weight:600; }
+  .g-item .g-loc{ color:var(--ink-soft); font-style:italic; }
+
+  /* Room plates */
+  .plates{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:8px;
+  }
+  .plate{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:3px;
+    padding:14px 10px 12px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  }
+  .plate:hover{ transform:translateY(-1px); }
+  .plate .room-name{
+    font-family:Iowan Old Style, Palatino Linotype, Georgia, serif;
+    font-size:18px;
+    color:var(--navy);
+    font-weight:600;
+  }
+  .plate .room-track{ font-size:11px; color:var(--brick); margin-top:6px; min-height:14px; }
+  .plate.active{ border-color:var(--navy); box-shadow:0 2px 0 var(--navy); }
+  .plate::before{
+    content:"";
+    position:absolute; left:50%; top:6px; transform:translateX(-50%);
+    width:26px; height:3px; border-radius:2px; background:var(--paper-line);
+  }
+  .plate.active::before{ background:var(--brick-soft); }
+
+  /* Search */
+  .search-row{ margin:18px 0 6px; display:flex; justify-content:center; }
+  .search-row input{
+    width:100%; max-width:420px; font-size:14px; padding:9px 14px;
+    border:1px solid var(--paper-line); border-radius:20px;
+    background:var(--card); color:var(--ink); outline:none;
+    transition:border-color .15s ease; font-family:inherit;
+  }
+  .search-row input:focus{ border-color:var(--navy-soft); }
+  .search-hint{ text-align:center; font-size:12px; color:var(--ink-soft); margin:6px 0 0; min-height:16px; }
+
+  /* Timeline */
+  .timeline{ margin-top:22px; position:relative; padding-left:78px; }
+  .timeline::before{
+    content:""; position:absolute; left:64px; top:6px; bottom:6px; width:1px; background:var(--paper-line);
+  }
+  .slot{ position:relative; margin-bottom:16px; }
+  .slot .time{
+    position:absolute; left:-78px; top:2px; width:64px; text-align:right;
+    font-size:12.5px; font-weight:600; color:var(--navy-soft); line-height:1.35;
+  }
+  .slot .dot{
+    position:absolute; left:-19px; top:6px; width:9px; height:9px; border-radius:50%;
+    background:var(--navy); border:2px solid var(--paper);
+  }
+  .slot.break .dot, .slot.lunch .dot, .slot.info .dot{ background:var(--paper-line); }
+  .slot.keynote .dot{ background:var(--brick); }
+
+  .entry{ background:var(--card); border:1px solid var(--paper-line); border-radius:6px; padding:12px 16px; }
+  .entry.hidden{ display:none; }
+  .slot.break .entry, .slot.lunch .entry, .slot.info .entry{
+    background:transparent; border:none; padding:4px 0 4px 2px;
+    font-style:italic; color:var(--ink-soft); font-size:13.5px;
+  }
+  .entry .tag-row{ display:flex; align-items:baseline; gap:8px; margin-bottom:4px; flex-wrap:wrap; }
+  .entry .code{
+    font-size:11px; font-weight:700; color:var(--brick); background:#f6e9e4;
+    padding:1px 6px; border-radius:3px; letter-spacing:.01em;
+  }
+  .entry .keynote-label{
+    font-size:11px; font-weight:700; color:#fff; background:var(--brick);
+    padding:2px 7px; border-radius:3px; letter-spacing:.01em;
+  }
+  .entry .speaker{ font-size:13.5px; color:var(--ink-soft); }
+  .entry .title{
+    font-family:Iowan Old Style, Palatino Linotype, Georgia, serif;
+    font-size:16px; line-height:1.4; color:var(--ink); margin:0;
+  }
+  .entry.keynote .title{ font-size:18px; }
+
+  footer{ text-align:center; margin-top:40px; font-size:12px; color:var(--ink-soft); }
+
+  @media (max-width:520px){
+    .plates{ grid-template-columns:1fr; }
+    .timeline{ padding-left:64px; }
+    .timeline::before{ left:52px; }
+    .slot .time{ left:-64px; width:50px; font-size:11.5px; }
+    .slot .dot{ left:-16px; }
+    .g-item{ flex-direction:column; gap:2px; }
+    .g-item .g-time{ flex:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">Congreso Colombiano de Astronomía</p>
+    <h1>COCOA 2026 — Programa completo</h1>
+    <p class="subline">Del martes 1 al viernes 4 de septiembre</p>
+  </header>
+
+  <div class="rule"></div>
+
+  <div class="days" id="days"></div>
+
+  <div class="general" id="general"></div>
+
+  <div class="plates" id="plates"></div>
+
+  <div class="search-row"><input type="text" id="search" placeholder="Buscar por ponente, código o título…"></div>
+  <p class="search-hint" id="searchHint"></p>
+
+  <div class="timeline" id="timeline"></div>
+
+  <footer>Universidad de los Andes · Facultad de Ciencias</footer>
+</div>
+
+<script>
+const WEEK = {
+  martes: {
+    dayName: "Martes 1 sep",
+    venue: "UDistrital · Aduanilla de Paiba",
+    general: [
+      {time:"07:00", text:"Inicio del registro", loc:"Auditorio Central"},
+      {time:"08:00", text:"Acto Inaugural del CoCoA 2026", loc:"Auditorio Central"},
+      {time:"19:00–20:00", text:"Cóctel de Bienvenida del CoCoA 2026", loc:"Auditorio Central"},
+    ],
+    rooms:{
+      s1:{ name:"Auditorio Central", track:"Astrofísica Solar y Estelar + Magistrales", slots:[
+        {type:"keynote", time:"09:00–10:00", label:"Charla Magistral", speaker:"Luz Ángela García",
+          title:"Develando las propiedades de las galaxias que dieron inicio a la era de reionización del Universo"},
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"ASE01", speaker:"Dylan Alexander Castellanos Jaimes",
+          title:"Efecto de las colisiones ión-neutral sobre la propagación de ondas MHD en la cromósfera solar"},
+        {type:"talk", time:"10:50–11:10", code:"ASE02", speaker:"Adrian Ricardo Montañez Lobo",
+          title:"El proceso de la reconexión magnética en plasmas parcialmente ionizados: una insignia de la cromosfera solar"},
+        {type:"talk", time:"11:10–11:30", code:"ASE03", speaker:"Sandra Milena Conde Cuellar",
+          title:"Magneto-acoustic waves propagation and characterisation of the solar atmosphere"},
+        {type:"talk", time:"11:30–11:50", code:"ASE04", speaker:"Juan David Chaparro Rojas",
+          title:"Modelado gravitoelectromagnético de galaxias de disco en rotación con perfil de Navarro–Frenk–White"},
+        {type:"talk", time:"11:50–12:10", code:"ASE05", speaker:"Caridad Mariana Arrieta Ferreira",
+          title:"Caracterización de las fases pre-eruptivas y pre-disipativas del disco circunestelar de HD 6226"},
+        {type:"talk", time:"12:10–12:30", code:"ASE06", speaker:"Mariana Castellanos Ramirez",
+          title:"Assessing a faint CME possibly connected to the SOL2024-04-17T22:10 M1.0 flare"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"keynote", time:"14:00–15:00", label:"Charla Magistral", speaker:"Maria Claudia Ramírez-Tannus",
+          title:"XUE: Explorando las propiedades físicas y químicas de discos protoplanetarios en ambientes de radiación extrema"},
+        {type:"break", time:"15:00–15:30", title:"Coffee break"},
+        {type:"info", time:"15:30–16:30", title:"Presentación CHIA"},
+        {type:"info", time:"16:30–17:00", title:"Presentación AstroCO"},
+        {type:"info", time:"17:00–18:30", title:"Presentación de pósters"},
+      ]},
+      s2:{ name:"Auditorio de Investigadores", track:"Sistema Solar, Exoplanetas y Astrobiología", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"SS01", speaker:"Julian Andreas Corzo Acosta",
+          title:"Pigmentos fotoprotectores en comunidades microbianas endolíticas de yesos colombianos: implicaciones astrobiológicas"},
+        {type:"talk", time:"10:50–11:10", code:"SS02", speaker:"Pablo Agudelo-Londoño",
+          title:"Análisis de la relación océano-atmósfera en planetas extraosolares: a la búsqueda de océanos exoplanetarios"},
+        {type:"talk", time:"11:10–11:30", code:"SS03", speaker:"David Santiago Duque Castaño",
+          title:"Diferenciación de escenarios ExoFarm y no agrícolas mediante tecnofirmas atmosféricas en ambientes planetarios alrededor de enanas M"},
+        {type:"talk", time:"11:30–11:50", code:"SS04", speaker:"Mario Alexander Sucerquia Areiza",
+          title:"From tidal migration to exomoon survival: can close-in giant planets still host detectable satellites?"},
+        {type:"talk", time:"11:50–12:10", code:"SS05", speaker:"Camilo Andres Ospinal Achicanoy",
+          title:"Comparing Line-by-Line Radial Velocity Method to Measure Near-Resonant Planet Masses around a Red Dwarf"},
+        {type:"talk", time:"12:10–12:30", code:"SS06", speaker:"Marcela Echeverri Gallego",
+          title:"Understanding Radial Velocity Variations in Barnard's Star Through Phase-Lag Analysis"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"break", time:"15:00–15:30", title:"Coffee break"},
+        {type:"info", time:"17:00–18:30", title:"Presentación de pósters"},
+      ]},
+      s3:{ name:"Salón Observatorio Astronómico LatitUD", track:"Altas Energías y Astronomía Fundamental", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"AFP01", speaker:"Daniel Ruiz Muñoz",
+          title:"Tras el rastro de un visitante interestelar: seguimiento de 3I/ATLAS desde el OAUTP en la campaña mundial liderada por la IAWN"},
+        {type:"talk", time:"10:50–11:10", code:"AFP02", speaker:"Edilberto Suárez, Daniel Rico, César Ayala",
+          title:"Procesamiento VLBI Geodésico desde Colombia"},
+        {type:"talk", time:"11:10–11:30", code:"AAE01", speaker:"Brayan Santiago Amorocho Lizcano",
+          title:"Influencia de la rotación en la morfología del shadow y la dinámica del disco de acreción en singularidades desnudas"},
+        {type:"talk", time:"11:30–11:50", code:"AAE02", speaker:"Luis Enrique Niño Aza",
+          title:"Soluciones analíticas para toros magnetizados con polarización en la métrica de Kerr"},
+        {type:"talk", time:"11:50–12:10", code:"AAE03", speaker:"Bryan Martinez Anzola",
+          title:"Efecto de la resistividad en la evolución de la inestabilidad Kelvin–Helmholtz en plasmas relativistas magnetizados"},
+        {type:"talk", time:"12:10–12:30", code:"AAE04", speaker:"Robert Orcasitas García",
+          title:"Límites de resolución en muografía de absorción inducidos por la sobredispersión estadística"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"break", time:"15:00–15:30", title:"Coffee break"},
+        {type:"info", time:"17:00–18:30", title:"Presentación de pósters"},
+      ]},
+    }
+  },
+
+  miercoles: {
+    dayName: "Miércoles 2 sep",
+    venue: "Instituto de Metrología (IMC) → OAN-UNAL",
+    general: [
+      {time:"08:00", text:"Charla Magistral — Por: José Benavides", loc:"«Más allá de los discos y los esferoides: la diversidad morfológica de las galaxias de baja masa y el enigma de las galaxias delgadas» · Auditorio IMC"},
+      {time:"09:00", text:"Desplazamiento desde el IMC a OAN-UNAL", loc:""},
+    ],
+    rooms:{
+      s1:{ name:"Salón de Reuniones 1", track:"Astrofísica Solar y Estelar", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"ASE07", speaker:"Juan Rafael Jiménez Sanabria",
+          title:"Un enfoque de predicción estadística de series temporales para las tasas de ocurrencia de eyecciones de masa coronal mediante modelos ARIMA y ARIMAX"},
+        {type:"talk", time:"10:50–11:10", code:"ASE08", speaker:"Cristian David Chavez Aponte",
+          title:"Una aproximación a la interacción entre eyecciones de masa coronal homólogas mediante simulación"},
+        {type:"talk", time:"11:10–11:30", code:"ASE09", speaker:"Andres Felipe Guerrero Guio",
+          title:"Diagnósticos multi-punto para el estudio de la transferencia de energía en plasmas turbulentos"},
+        {type:"talk", time:"11:30–11:50", code:"ASE10", speaker:"Santiago Alejandro Pinilla Capador",
+          title:"Monitoreo histórico y en tiempo casi real del índice de perturbación geomagnética local (Dlat) para el Observatorio de Fúquene"},
+        {type:"talk", time:"11:50–12:10", code:"ASE11", speaker:"Luis Felipe Losada Gonzalez",
+          title:"Investigating the Origin of Flare-Driven Seismic Emission in Active Region 4455"},
+        {type:"talk", time:"12:10–12:30", code:"ASE12", speaker:"Daniel Alberto Rodríguez Torres",
+          title:"Rastreando fuentes de emisión sísmica de alta frecuencia en el quiet Sun mediante holografía heliosísmica"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"talk", time:"14:00–14:20", code:"ASE13", speaker:"Oscar Andres Calvo Rebellon",
+          title:"MOSAIC: A tool for analysing plasma and MHD wave dynamics in solar physics"},
+        {type:"talk", time:"14:20–14:40", code:"ASE14", speaker:"Thomas Gonzalez Rodriguez",
+          title:"On the nature of long-period umbrae oscillations"},
+        {type:"talk", time:"14:40–15:00", code:"ASE15", speaker:"Milena Andrea Barrios Gallego",
+          title:"A Fokker-Planck Model of Anisotropic Electron Transport in Solar Flares and its Hard X-ray Polarization Signatures"},
+        {type:"info", time:"15:00–15:30", title:"Presentación RECA"},
+        {type:"info", time:"15:30–16:00", title:"Presentación de pósters + Coffee break"},
+        {type:"info", time:"16:00–17:30", title:"Asamblea RECA / Asamblea AstroCO"},
+        {type:"info", time:"17:30–18:30", title:"Presentación de pósters"},
+      ]},
+      s2:{ name:"Salón de Reuniones 2", track:"Instrumentación, Datos e IA / Sistema Solar", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"AAE05", speaker:"Yessica Dominguez Ballesteros",
+          title:"Detectores de superficie para el estudio de rayos cósmicos y clima espacial"},
+        {type:"talk", time:"10:50–11:10", code:"ICD01", speaker:"Sofía Lorena Casallas Beltrán",
+          title:"Caracterización fisicoquímica de Objetos Estelares Jóvenes Masivos (MYSOs) mediante modelos de regresión y aprendizaje automático"},
+        {type:"talk", time:"11:10–11:30", code:"ICD02", speaker:"David Santiago Duque Castaño",
+          title:"Clasificación asistida por máquina de biofirmas potenciales en exoplanetas similares a la Tierra usando espectros de transmisión de baja relación señal-ruido"},
+        {type:"talk", time:"11:30–11:50", code:"ICD03", speaker:"Germán Chaparro",
+          title:"Toward Robust Detection of the Global 21 cm Signal through Instrument and Foreground Optimization"},
+        {type:"talk", time:"11:50–12:10", code:"ICD04", speaker:"Brayhan Pérez Rendon",
+          title:"Computational optimization applied to the electromagnetic design of radio-astronomical instrumentation"},
+        {type:"talk", time:"12:10–12:30", code:"AOM01", speaker:"Juliana Ruiz Montoya",
+          title:"Desarrollo de un Entorno Computacional Paramétrico para la Optimización de Radiotelescopios de Banda Ancha en Entornos Geológicos Reales"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"talk", time:"14:00–14:20", code:"SS07", speaker:"Sebastian Hernandez",
+          title:"XUE. Modeling MIR Molecular Gas Tracers of Truncation in Highly Irradiated Planet-forming Disks"},
+        {type:"talk", time:"14:20–14:40", code:"SS08", speaker:"Simón Rodríguez Arango",
+          title:"Más allá del LTE: evaluación del HCN y C2H2 como trazadores de truncamiento en discos protoplanetarios altamente irradiados"},
+        {type:"talk", time:"14:40–15:00", code:"SS09", speaker:"Maria José Lambis Valenzuela",
+          title:"Espectros de transmisión de atmósferas terrestres: Buscando la Tierra II"},
+        {type:"info", time:"15:00–15:30", title:"Presentación RECA"},
+        {type:"info", time:"15:30–16:00", title:"Presentación de pósters + Coffee break"},
+        {type:"info", time:"16:00–17:30", title:"Asamblea RECA / Asamblea AstroCO"},
+        {type:"info", time:"17:30–18:30", title:"Presentación de pósters"},
+      ]},
+      s3:{ name:"Salón de Cómputo", track:"Educación, Divulgación e Historia de la Astronomía", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"EDH01", speaker:"Juanita Andrea Agudelo",
+          title:"Mensajeros de la ciencia en la Alta Guajira"},
+        {type:"talk", time:"10:50–11:10", code:"EDH02", speaker:"Johan Nicolás Molina Córdoba",
+          title:"eSPECTRA, una plataforma para la difusión de la investigación y la apropiación social de la astronomía en Colombia"},
+        {type:"talk", time:"11:10–11:30", code:"EDH03", speaker:"Omar Alfonso Bohórquez Pacheco",
+          title:"Galaxias de café: un modelo análogo fluido para explorar perfiles ópticos y cinemáticos en estructuras tipo disco"},
+        {type:"talk", time:"11:30–11:50", code:"EDH04", speaker:"Adriana Victoria Araujo Salcedo",
+          title:"Del reporte ciudadano al estudio de los bólidos observados en Colombia en mayo de 2024"},
+        {type:"talk", time:"11:50–12:10", code:"EDH05", speaker:"Andrés Felipe Gutiérrez Serna",
+          title:"Galaxias de café: un modelo análogo fluido para explorar perfiles ópticos y cinemáticos en estructuras tipo disco"},
+        {type:"talk", time:"12:10–12:30", code:"EDH06", speaker:"Edilberto Suárez",
+          title:"Astronomía y Educación: una propuesta para transformar la enseñanza de las ciencias en Colombia"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"info", time:"15:30–16:00", title:"Presentación de pósters + Coffee break"},
+        {type:"info", time:"17:30–18:30", title:"Presentación de pósters"},
+      ]},
+    }
+  },
+
+  jueves: {
+    dayName: "Jueves 3 sep",
+    venue: "Universidad de los Andes",
+    general: [
+      {time:"15:30–16:00", text:"Desplazamiento al Auditorio de Casa del Japón", loc:"en la misma Uniandes"},
+      {time:"16:00–18:00", text:"Conversatorio con Pilar Archila (NASA)", loc:"Auditorio Casa del Japón"},
+      {time:"19:30–20:00", text:"Astronomy on the Tab", loc:"Bakua · Calle 63 #35-55 Local 2"},
+    ],
+    rooms:{
+      s1:{ name:"Salón W102 (87 pers.)", track:"Astrofísica Solar y Estelar", slots:[
+        {type:"keynote", time:"09:00–10:00", label:"Charla Magistral", speaker:"Andrés Plazas-Malagón",
+          title:"Cosmología con mapeos de galaxias y cámaras de gran campo de visión"},
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"ASE16", speaker:"Laura Natalia Corzo Laverde",
+          title:"Convección y fractura en objetos compactos con anisotropía de presión como contribución a la densidad de energía"},
+        {type:"talk", time:"10:50–11:10", code:"ASE17", speaker:"Camila Fernanda Sánchez Paredes",
+          title:"Determinación del periodo de variabilidad cromosférica en estrellas gigantes a través del análisis de la línea de emisión K de Ca II"},
+        {type:"talk", time:"11:10–11:30", code:"ASE18", speaker:"Samuel Felipe Noreña Téllez",
+          title:"On the photospheric magnetic origin of coronal rain in the solar atmosphere"},
+        {type:"talk", time:"11:30–11:50", code:"ASE19", speaker:"Angel Daniel Martinez Cifuentes",
+          title:"Dual-Vantage Observations of Preflare Dynamics and Sunquake Signatures"},
+        {type:"talk", time:"11:50–12:10", code:"ASE20", speaker:"Paula Jessica Gonzalez Prieto",
+          title:"Modelling non-thermal bremsstrahlung emission from electron populations in solar flares"},
+        {type:"talk", time:"12:10–12:30", code:"ASE21", speaker:"Ana Sofia Marulanda Duque",
+          title:"Caracterización de la protoestrella masiva G45.47+0.05 y su entorno energético en búsqueda de acreción activa"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"talk", time:"14:00–14:20", code:"ASE22", speaker:"Simon Salas Hernandez",
+          title:"De los registros históricos al monitoreo geomagnético casi en tiempo real: implementación del índice K local en el Observatorio de Fúquene, Colombia"},
+        {type:"talk", time:"14:20–14:40", code:"ASE23", speaker:"Camilo Andres Ospinal Achicanoy",
+          title:"Actividad magnética en el fin del nacimiento estelar: Rotación y H-alpha de enanas frías en la ZAMS"},
+        {type:"talk", time:"14:40–15:00", code:"ASE24", speaker:"Edwin Andrés Mejía Marín",
+          title:"HD 46150: Descubrimiento de una binaria masiva de largo período en la Nebulosa Roseta"},
+      ]},
+      s2:{ name:"Salón LL002 (39 pers.)", track:"Galaxias y Cosmología", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"GAL01", speaker:"Juan David Lara Barrero",
+          title:"Determinación de la constante cosmológica en el modelo cosmológico de Kottler (Schwarzschild–de Sitter) en la desviación de la luz en el campo gravitacional del Sol"},
+        {type:"talk", time:"10:50–11:10", code:"GAL02", speaker:"Sebastián Rueda Blanco",
+          title:"The X–UV luminosity relation in AGNs as a cosmological tool"},
+        {type:"talk", time:"11:10–11:30", code:"GAL03", speaker:"Carlos Eduardo Cedeño Montaña",
+          title:"Master equation solutions in the linear regime of characteristic formulation of general relativity in the Minkowski and Schwarzschild backgrounds"},
+        {type:"talk", time:"11:30–11:50", code:"GAL04", speaker:"David Fernandez Arenas",
+          title:"The Expansion of the Universe from Cosmic Dawn to the Present with H ii Galaxies"},
+        {type:"talk", time:"11:50–12:10", code:"GAL05", speaker:"Holman Daniel Quintero Salazar",
+          title:"Recalibrating the L–σ relation for H II galaxies: implications for independent measurements of the Hubble constant"},
+        {type:"talk", time:"12:10–12:30", code:"GAL06", speaker:"Juan Carlos Muñoz Cuartas",
+          title:"Caracterizando el ISM en el vecindario de SMBHs en las simulaciones Illustris TNG"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"talk", time:"14:00–14:20", code:"GAL07", speaker:"Sarah Niño Rojas",
+          title:"Galaxia Sparkler: Análisis y caracterización espectroscópica de una galaxia primitiva"},
+        {type:"talk", time:"14:20–14:40", code:"GAL08", speaker:"César Alexander Chacón Cardona",
+          title:"Contraste de densidad para una distribución de materia oscura no-homogénea en la métrica de Lemaître–Tolman–Bondi"},
+        {type:"talk", time:"14:40–15:00", code:"GAL09", speaker:"Yeimy Dallana Camargo Camargo",
+          title:"Relación halo-galaxia: tiempo de ensamblaje de halos de materia oscura y su conexión con las propiedades observacionales de sus galaxias en Illustris TNG300"},
+      ]},
+      s3:{ name:"Salón ML513 (50 pers.)", track:"Instrumentación, Ciencia de Datos e IA", slots:[
+        {type:"break", time:"10:00–10:30", title:"Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"ICD05", speaker:"Sergio Andrés Carrasquilla Hernández",
+          title:"GalaxIA: Clasificación galáctica mediante inteligencia artificial"},
+        {type:"talk", time:"10:50–11:10", code:"ICD06", speaker:"David Santiago Duque Castaño",
+          title:"Reducción eficiente de contaminación estelar y ruido en espectros de transmisión planetaria usando redes neuronales"},
+        {type:"talk", time:"11:10–11:30", code:"ICD07", speaker:"Martín Mauricio Medina Lesmes",
+          title:"Correlaciones entre eyecciones de masa coronal y manchas solares dependientes de la velocidad: un análisis estadístico multiescala a lo largo de los ciclos solares 23–25"},
+        {type:"talk", time:"11:30–11:50", code:"ICD08", speaker:"Danna Vanessa Ortiz Carrillo",
+          title:"Diseño y simulación de un campo magnético terrestre para la validación del ADCS en nano-satélites"},
+        {type:"talk", time:"11:50–12:10", code:"ICD09", speaker:"Iván Gabriel Mafla Bolaños",
+          title:"Breaking Parameter Degeneracies in Eclipsing Binaries with Multimodal and Physics-Informed Multi-Fidelity Learning"},
+        {type:"talk", time:"12:10–12:30", code:"ICD10", speaker:"Fredy Alexander Orjuela López",
+          title:"Emulador de redes neuronales para el análisis espectroscópico bayesiano de N2H+ en gas molecular denso"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"talk", time:"14:00–14:20", code:"ICD11", speaker:"Mariana Lopera Correa",
+          title:"OUL-DB, una plataforma híbrida de datos para el Observatorio Ultravioleta Lunar y su posible aplicación en el modelamiento de inestabilidades paramétricas en el plasma magnetosférico terrestre"},
+        {type:"talk", time:"14:20–14:40", code:"ICD12", speaker:"Julian Gustavo Rodríguez Ferreira",
+          title:"CANTAR: Consolidating a Colombian Antarctic Radio Astronomy Collaboration for Global 21-cm Cosmology"},
+        {type:"talk", time:"14:40–15:00", code:"ICD13", speaker:"Alexandra Serrano Mendoza",
+          title:"Identifying and Measuring Satellite Streaks in DECam Images"},
+      ]},
+    }
+  },
+
+  viernes: {
+    dayName: "Viernes 4 sep",
+    venue: "UNAL · Observatorio Astronómico Nacional (OAN)",
+    general: [],
+    rooms:{
+      s1:{ name:"Salón Reuniones 1 (Auditorio Charla Magistral)", track:"Galaxias y Cosmología + Magistral y Premios", slots:[
+        {type:"keynote", time:"09:00–10:00", label:"Charla Magistral", speaker:"Karla Peña",
+          title:"Rubin desde adentro: ciencia e ingeniería"},
+        {type:"info", time:"10:00–10:30", title:"Presentación de pósters + Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"GAL10", speaker:"Yeimy Dallana Camargo Camargo",
+          title:"Anisotropía de marea y su papel en el ensamblaje de halos y la conexión halo–galaxia"},
+        {type:"talk", time:"10:50–11:10", code:"GAL11", speaker:"Jaime Ernesto Forero Romero",
+          title:"La red cósmica con DESI"},
+        {type:"talk", time:"11:10–11:30", code:"GAL12", speaker:"Carlos Mario Garcia Alvarez",
+          title:"Simulaciones de galaxias con halos de materia oscura con partículas de masa variable"},
+        {type:"talk", time:"11:30–11:50", code:"GAL13", speaker:"José Mauricio Diaz Fonseca",
+          title:"Identificando las propiedades de los brazos espirales y distribución radial de la formación estelar en galaxias cercanas"},
+        {type:"talk", time:"11:50–12:10", code:"GAL14", speaker:"Heidi Alvarez Morales",
+          title:"Probando modelos de gravedad modificada para la Vía Láctea"},
+        {type:"talk", time:"12:10–12:30", code:"GAL15", speaker:"Silvia Carolina Rueda Vargas",
+          title:"Multiscale and multiphase AGN feedback at cosmic noon"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"talk", time:"14:00–14:20", code:"Premio 1", speaker:"Jeison Alfonso (Uniandes)",
+          title:"Premio AstroCO 2025 – Doctorado: «Open cluster dynamics»"},
+        {type:"talk", time:"14:20–14:40", code:"Premio 2", speaker:"Juan Esteban Agudelo Ortiz (UNAL)",
+          title:"Premio AstroCO 2025 – Maestría: «Implementation of Artificial Intelligence techniques for the inversion of the Stokes parameters in the solar context»"},
+        {type:"talk", time:"14:40–15:00", code:"Premio 3", speaker:"Marcela Echeverri (UdeA)",
+          title:"Premio AstroCO 2025 – Pregrado: «ALMA Mapping of Molecular Gas and Dust in the Post-AGB Star IRAS 15445-5449»"},
+        {type:"info", time:"15:00–15:30", title:"Presentación de pósters + Coffee break"},
+        {type:"info", time:"16:00–18:30", title:"Clausura y jornada de integración"},
+      ]},
+      s2:{ name:"Salón de Reuniones 2", track:"Sistema Solar, Instrumentación y Cosmología", slots:[
+        {type:"info", time:"10:00–10:30", title:"Presentación de pósters + Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"SS10", speaker:"Ana Sofia Marulanda Duque",
+          title:"Búsqueda sistemática de monóxido de silicio (SiO) en discos protoplanetarios como trazador de ionización por rayos cósmicos y la brecha observacional en el archivo ALMA"},
+        {type:"talk", time:"10:50–11:10", code:"SS11", speaker:"Miguel Enrique Gámez López",
+          title:"Ambientes extremos de América Latina: laboratorios naturales para la astrobiología"},
+        {type:"talk", time:"11:10–11:30", code:"ICD14", speaker:"Julián Gustavo Rodríguez Ferreira",
+          title:"CORO: A Two-Element Interferometric Array for Neutral Hydrogen Studies within the ARMONIA Observatory"},
+        {type:"talk", time:"11:30–11:50", code:"ICD15", speaker:"Juan Esteban Agudelo Ortiz",
+          title:"Un Copiloto para Física Solar"},
+        {type:"talk", time:"11:50–12:10", code:"GAL16", speaker:"Miguel Perdomo Luna",
+          title:"Multiplet alignment trends in DESI Y3 Bright Galaxy Survey"},
+        {type:"talk", time:"12:10–12:30", code:"GAL17", speaker:"Nicolas Camilo Contreras Mendez",
+          title:"La función de partición gravitacional euclidiana y la termodinámica de agujeros negros de Schwarzschild-AdS"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"info", time:"15:00–15:30", title:"Presentación de pósters + Coffee break"},
+      ]},
+      s3:{ name:"Salón de Cómputo", track:"Educación y Astrofísica Estelar", slots:[
+        {type:"info", time:"10:00–10:30", title:"Presentación de pósters + Coffee break"},
+        {type:"talk", time:"10:30–10:50", code:"EDH07", speaker:"Jhonattan Javier Pisco Guabave",
+          title:"RACiMo-Orquídeas: de la atmósfera local a la habitabilidad planetaria — una red ciudadana de monitoreo ambiental en Santander, Colombia"},
+        {type:"talk", time:"10:50–11:10", code:"EDH08", speaker:"Camilo Delgado-Correal",
+          title:"Renombrando el cielo: astronomía, territorio y confianza en comunidades rurales"},
+        {type:"talk", time:"11:10–11:30", code:"ASE25", speaker:"Juan José Quintero Díaz",
+          title:"Aparición y desvanecimiento repentino de una penumbra huérfana observada con alta resolución por el telescopio GREGOR"},
+        {type:"talk", time:"11:30–11:50", code:"ASE26", speaker:"Diego Andres Bolaños",
+          title:"Determinación del periodo de variabilidad cromosférica en estrellas gigantes a través del análisis de la línea de emisión K de Ca II"},
+        {type:"lunch", time:"12:30–14:00", title:"Almuerzo libre"},
+        {type:"info", time:"15:00–15:30", title:"Presentación de pósters + Coffee break"},
+      ]},
+    }
+  },
+};
+
+let currentDay = "jueves";
+let currentRoom = "s1";
+let currentQuery = "";
+
+function renderDays(){
+  const el = document.getElementById('days');
+  el.innerHTML = "";
+  Object.keys(WEEK).forEach(key=>{
+    const d = WEEK[key];
+    const btn = document.createElement('div');
+    btn.className = 'day-btn' + (key===currentDay ? ' active' : '');
+    btn.innerHTML = `<span class="d-name">${d.dayName}</span><span class="d-venue">${d.venue}</span>`;
+    btn.addEventListener('click', ()=>{
+      currentDay = key;
+      currentRoom = "s1";
+      renderDays();
+      renderGeneral();
+      renderPlates();
+      renderTimeline();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function renderGeneral(){
+  const day = WEEK[currentDay];
+  const el = document.getElementById('general');
+  if(!day.general || day.general.length === 0){ el.innerHTML = ""; return; }
+  let html = `<p class="general-title">Actividades generales del día</p><div class="general-list">`;
+  day.general.forEach(item=>{
+    html += `<div class="g-item">
+      <span class="g-time">${item.time}</span>
+      <span class="g-text">${item.text}${item.loc ? ` — <span class="g-loc">${item.loc}</span>` : ""}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function renderPlates(){
+  const day = WEEK[currentDay];
+  const plates = document.getElementById('plates');
+  plates.innerHTML = "";
+  Object.keys(day.rooms).forEach(key=>{
+    const room = day.rooms[key];
+    const div = document.createElement('div');
+    div.className = 'plate' + (key===currentRoom ? ' active' : '');
+    div.innerHTML = `
+      <div class="room-name">${room.name}</div>
+      <div class="room-track">${room.track}</div>
+    `;
+    div.addEventListener('click', ()=>{
+      currentRoom = key;
+      renderPlates();
+      renderTimeline();
+    });
+    plates.appendChild(div);
+  });
+}
+
+function matches(slot, q){
+  if(!q) return true;
+  const hay = ((slot.speaker||"") + " " + (slot.title||"") + " " + (slot.code||"")).toLowerCase();
+  return hay.includes(q);
+}
+
+function renderTimeline(){
+  const day = WEEK[currentDay];
+  const room = day.rooms[currentRoom];
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = "";
+  const q = currentQuery.trim().toLowerCase();
+  let visibleCount = 0;
+
+  room.slots.forEach(slot=>{
+    const isMatch = matches(slot, q);
+    if(isMatch) visibleCount++;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'slot ' + slot.type;
+    if(!isMatch) wrap.style.display = 'none';
+
+    let entryHtml = "";
+    if(slot.type === 'keynote'){
+      entryHtml = `
+        <div class="entry keynote">
+          <div class="tag-row"><span class="keynote-label">${slot.label}</span></div>
+          <p class="title">«${slot.title}»</p>
+          <div class="speaker">Por: ${slot.speaker}</div>
+        </div>`;
+    } else if(slot.type === 'break' || slot.type === 'lunch' || slot.type === 'info'){
+      entryHtml = `<div class="entry">${slot.title}</div>`;
+    } else {
+      entryHtml = `
+        <div class="entry">
+          <div class="tag-row"><span class="code">${slot.code}</span><span class="speaker">${slot.speaker}</span></div>
+          <p class="title">${slot.title}</p>
+        </div>`;
+    }
+
+    wrap.innerHTML = `
+      <div class="time">${slot.time}</div>
+      <div class="dot"></div>
+      ${entryHtml}
+    `;
+    tl.appendChild(wrap);
+  });
+
+  const hint = document.getElementById('searchHint');
+  if(q){
+    hint.textContent = visibleCount === 0
+      ? `Sin resultados para "${q}" en ${room.name}.`
+      : `${visibleCount} resultado${visibleCount===1?'':'s'} en ${room.name}.`;
+  } else {
+    hint.textContent = "";
+  }
+}
+
+document.getElementById('search').addEventListener('input', (e)=>{
+  currentQuery = e.target.value;
+  renderTimeline();
+});
+
+renderDays();
+renderGeneral();
+renderPlates();
+renderTimeline();
+</script>
+</body>
+</html>
