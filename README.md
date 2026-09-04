@@ -37,5 +37,10 @@ Acta de premiación (leída en la ceremonia del 14 de noviembre de 2025):
 Los tres trabajos ganadores se presentan el jueves 3 de septiembre en la sesión
 de Magistral y Premios (Universidad de los Andes).
 
+El galardón entregado a los ganadores fue diseñado por Santiago Reyes Villaveces,
+profesor del Departamento de Diseño de Uniandes, y fabricado en los talleres de la
+Facultad de Arquitectura y Diseño:
+[Santiago Reyes y el galardón del Premio AstroCO](https://arqdis.uniandes.edu.co/anuncios/santiago-reyes-galardon-premio-astroco/)
+
 Lineamientos de la convocatoria 2026 (abre el 15 de septiembre de 2026, cierra el
 15 de octubre): [LineamientosPremioAstroCO2026.pdf](LineamientosPremioAstroCO2026.pdf)
