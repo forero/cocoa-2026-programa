@@ -34,8 +34,9 @@ Fuente: [Programa y Cronograma CoCoA 2026](https://accefyn.com/microsites/nodos/
 Acta de premiación (leída en la ceremonia del 14 de noviembre de 2025):
 [ActaJuradoPremioEstudiantilAstroCO2025.pdf](ActaJuradoPremioEstudiantilAstroCO2025.pdf)
 
-Los tres trabajos ganadores se presentan el jueves 3 de septiembre en la sesión
-de Magistral y Premios (Universidad de los Andes).
+Los tres trabajos ganadores se presentan el viernes 4 de septiembre, de 14:00 a
+15:00, en la sesión de Magistral y Premios (UNAL · Observatorio Astronómico
+Nacional).
 
 El galardón entregado a los ganadores fue diseñado por Santiago Reyes Villaveces,
 profesor del Departamento de Diseño de Uniandes, y fabricado en los talleres de la
