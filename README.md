@@ -26,3 +26,12 @@ Fuente: [Programa y Cronograma CoCoA 2026](https://accefyn.com/microsites/nodos/
 - `index.html` / `cocoa_programa_completo.html` — la página del programa.
 - `qr_cocoa26.pdf` — hoja con códigos QR: charlas del día 3 y enlace para subir presentaciones.
 - `Puerta_*.pdf` — señalización para las puertas de los salones (LL002, ML513, W102).
+- `ActaJuradoPremioEstudiantilAstroCO2025.pdf` — acta del Premio AstroCO 2025 a la Investigación Estudiantil.
+
+## Premio AstroCO 2025 a la Investigación Estudiantil
+
+Acta de premiación (leída en la ceremonia del 14 de noviembre de 2025):
+[ActaJuradoPremioEstudiantilAstroCO2025.pdf](ActaJuradoPremioEstudiantilAstroCO2025.pdf)
+
+Los tres trabajos ganadores se presentan el jueves 3 de septiembre en la sesión
+de Magistral y Premios (Universidad de los Andes).
